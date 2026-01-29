@@ -6,10 +6,56 @@ import (
 	"time"
 
 	"github.com/len4ernova/lets_go_further/internal/data"
+	"github.com/len4ernova/lets_go_further/internal/validator"
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new movie")
+	var input struct {
+		Title   string       `json:"title"`
+		Year    int32        `json:"year"`
+		Runtime data.Runtime `json:"runtime"`
+		Genres  []string     `json:"genres"`
+	}
+	// I. использование io.ReadAll() для чтения тела запроса []byte
+	// производительность ниже, чем у Decoder.
+	// body, err := io.ReadAll(r.Body)
+	// if err != nil {
+	// 	app.serverErrorResponse(w, r, err)
+	// 	return
+	// }
+	// err = json.Unmarshal(body, &input)
+	// if err != nil{
+	// 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
+
+	// II. использование NewDecoder
+	//err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		//app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// выполним проверки полей с помощью
+	// предварительно скопируем данные в movie
+	movie := &data.Movie{
+		Title:   input.Title,
+		Year:    input.Year,
+		Runtime: input.Runtime,
+		Genres:  input.Genres,
+	}
+	// Создаем новый валидатор
+	v := validator.New()
+
+	// вызываем ф-ию валидации
+	if data.ValidateMovie(v, movie); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
