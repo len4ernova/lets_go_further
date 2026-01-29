@@ -22,3 +22,33 @@ psql $GREENLIGHT_DB_DSN
 
 # изменить настройки пула соединений БД
 go run ./cmd/api -db-max-open-conns=50 -db-max-idle-conns=50 -db-max-idle-time=2h30m
+
+#migrate
+# create table ..  | DROP table..
+ migrate create -seq -ext=.sql -dir=./migrations create_movies_table
+
+#CHECK
+ migrate create -seq -ext=.sql -dir=./migrations add_movies_check_constraints
+
+# узнать версию миграции
+ migrate -path=./migrations -database=$EXAMPLE_DSN version
+
+# миграция к опред. версии
+migrate -path=./migrations -database=$EXAMPLE_DSN goto 1
+
+#  откатить последнюю миграцию
+ migrate -path=./migrations -database =$EXAMPLE_DSN down 1
+
+# откат всех миграций
+migrate -path=./migrations -database=$EXAMPLE_DSN down
+
+# fix синтаксических ошибок
+# найти в чем ошибка. вручную откатиться к стабильной версии
+# вручную установить номер версии 
+migrate -path=./migrations -database=$EXAMPLE_DSN force 1
+
+# чтение файлов миграции из удаленных источников
+# https://github.com/golang-migrate/migrate#migration-sources
+migrate -source="s3://<bucket>/<path>" -database=$EXAMPLE_DSN up
+migrate -source="github://owner/repo/path#ref" -database=$EXAMPLE_DSN up
+migrate -source="github://user:personal-access-token@owner/repo/path#ref" -database=$EXAMPLE_DSN up
