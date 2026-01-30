@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/len4ernova/lets_go_further/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -24,7 +25,7 @@ type config struct {
 		// настройка пула соединений
 		maxOpenConns int           // PostgreSQL макс открытых соединений
 		maxIdleConns int           // PostgreSQL макс неактивных соединений
-		maxIdleTime  time.Duration // продолжительность неакт. соединения
+		maxIdleTime  time.Duration // PostgreSQL продолжительность неакт. соединения
 	}
 }
 
@@ -32,6 +33,7 @@ type config struct {
 type application struct {
 	config config
 	logger *slog.Logger
+	models data.Models
 }
 
 func main() {
@@ -65,6 +67,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	// Declare a HTTP server

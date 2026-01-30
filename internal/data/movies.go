@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/len4ernova/lets_go_further/internal/validator"
@@ -15,6 +16,11 @@ type Movie struct {
 	Genres    []string  `json:"genres,omitzero"`  // Slice of genres for the movie (romance, comedy, etc.)
 	Version   int32     `json:"version"`          // The version number starts at 1 and will be incremented each
 	// time the movie information is updated
+}
+
+// определим структуру, являющуюся оберткой для БД
+type MovieModel struct {
+	DB *sql.DB
 }
 
 // ValidateMovie - проверка валидности данных структуры Movie
@@ -35,4 +41,24 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 	//проверка уникальности жанров
 	v.Check(validator.Unique(movie.Genres), "genres", "must not contain duplicate values")
 
+}
+
+// placeholder - метод создающий запись в БД.
+func (m MovieModel) Insert(movie *Movie) error {
+	return nil
+}
+
+// placeholder - метод получение конкретной записи из БД.
+func (m MovieModel) Get(id int64) (*Movie, error) {
+	return nil, nil
+}
+
+// placeholder - метод обновляет конкретную запись в БД.
+func (m MovieModel) update(movie *Movie) error {
+	return nil
+}
+
+// placeholder - метод удаляет определнную запись в БД.
+func (m MovieModel) Delete(id int64) error {
+	return nil
 }
