@@ -46,10 +46,10 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 
 // placeholder - метод создающий запись в БД.
 func (m MovieModel) Insert(movie *Movie) error {
-	query := `'
+	query := `
 		INSERT INTO movies (title, year, runtime, genres)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, crested_at, version`
+		RETURNING id, created_at, version`
 	args := []any{movie.Title, movie.Year, movie.Runtime, pq.Array(movie.Genres)}
 
 	return m.DB.QueryRow(query, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)
