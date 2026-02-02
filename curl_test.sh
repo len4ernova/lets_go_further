@@ -82,3 +82,9 @@ curl -w '\nTime: %{time_total}s \n' localhost:4000/v1/movies/1
 
 #список фильмов (строка парметров)
 curl "localhost:4000/v1/movies?title=godfather&genres=crime,drama&page=18&page_size=5&sort=year"
+
+
+# проверка ввалидности данных переданных в строке запроса
+# невалидна строка
+curl  "localhost:4000/v1/movies?page=-1&page_size=-1&sort=foo"
+
