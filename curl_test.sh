@@ -52,3 +52,12 @@ migrate -path=./migrations -database=$EXAMPLE_DSN force 1
 migrate -source="s3://<bucket>/<path>" -database=$EXAMPLE_DSN up
 migrate -source="github://owner/repo/path#ref" -database=$EXAMPLE_DSN up
 migrate -source="github://user:personal-access-token@owner/repo/path#ref" -database=$EXAMPLE_DSN up
+
+
+#данные для БД: фильмы
+BODY='{"title":"Moana","year":2016,"runtime":"107 mins","genres":["animation","adventure"]}'
+BODY='{"title":"Black Panther","year":2018,"runtime":"134 mins","genres":["action","adventure"]}'
+BODY='{"title":"The Breakfast Club","year":1986, "runtime":"96 mins","genres":["drama"]}'
+# создать фильм в БД
+curl -d "$BODY" -i localhost:4000/v1/movies
+
