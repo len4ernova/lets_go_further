@@ -89,7 +89,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 	return &movie, nil
 }
 
-// placeholder - метод обновляет конкретную запись в БД.
+// метод обновляет конкретную запись в БД.
 func (m MovieModel) Update(movie *Movie) error {
 	query := `
 		UPDATE movies
@@ -108,7 +108,29 @@ func (m MovieModel) Update(movie *Movie) error {
 	return m.DB.QueryRow(query, args...).Scan(&movie.Version)
 }
 
-// placeholder - метод удаляет определнную запись в БД.
+// метод удаляет определнную запись в БД.
 func (m MovieModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+	query := `
+		DELETE FROM movies
+		WHERE id = $1`
+
+	result, err := m.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	// если кол-во возвращенных строк 0, значит ничего не удалили
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
 	return nil
 }

@@ -63,3 +63,10 @@ curl -d "$BODY" -i localhost:4000/v1/movies
 
 # вывести данные о фильме с id = 4 
 curl -i localhost:4000/v1/movies/4
+
+# UPDATE
+BODY='{"title":"The Breakfast Club","year":1986, "runtime":"100 mins","genres":["drama"]}'
+curl -X PUT localhost:4000/v1/movies/3
+
+# DELETE
+curl -X DELETE localhost:4000/v1/movies/3
