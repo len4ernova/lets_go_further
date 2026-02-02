@@ -8,6 +8,7 @@ import (
 // ошибка, в случае отсутствия данных в БД
 var (
 	ErrRecordNotFound = errors.New("record not found")
+	ErrEditConflict   = errors.New("edit conflict")
 )
 
 // Структура Models - обёртка для других моделей

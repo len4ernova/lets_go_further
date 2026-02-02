@@ -157,10 +157,22 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Можно исп-ть X-Expected-Version header  для верификации номера версии
+	// if r.Header.Get("X-Expected-Version") != "" {
+	// if strconv.Itoa(int(movie.Version)) != r.Header.Get("X-Expected-Version") {
+	// app.editConflictResponse(w, r)
+	// return
+	// }
+	//}
 	// передадим новую запись в ф-ию Update
 	err = app.models.Movies.Update(movie)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

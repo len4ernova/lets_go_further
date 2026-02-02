@@ -73,3 +73,6 @@ curl -X DELETE localhost:4000/v1/movies/3
 
 #PATCH
 curl -X PATCH -d '{"year": 1986}' localhost:4000/v1/movies/3
+
+# множественные запросы к конечной точке, детектирование состояния гонки
+xargs -I % -P8 curl -X PATCH -d '{"runtime": "97 mins"}' "localhost:4000/v1/movies/2" < <(printf '%s\n' {1..8})
