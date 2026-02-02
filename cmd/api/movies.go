@@ -200,3 +200,38 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+// listMoviesHandler - обработчик вернёт список фильмов, по параметрам запроса.
+func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
+	// структура хранит значения параметров запроса
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filters
+	}
+
+	// инициализируем экземпляр валидатора
+	v := validator.New()
+
+	// получим map с данными строки запроса
+	qs := r.URL.Query()
+
+	// извлесем значения из строки запроса
+	input.Title = app.readString(qs, "title", "")
+	input.Genres = app.readCSV(qs, "genres", []string{})
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-runtime"}
+
+	// выполнить валидацию
+	data.ValidateFilters(v, input.Filters)
+	// если необходимо отправить ответ
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
+
+}

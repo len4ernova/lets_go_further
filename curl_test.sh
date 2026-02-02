@@ -80,4 +80,5 @@ xargs -I % -P8 curl -X PATCH -d '{"runtime": "97 mins"}' "localhost:4000/v1/movi
 # curl запрос с фиксацией времени выполнения запроса
 curl -w '\nTime: %{time_total}s \n' localhost:4000/v1/movies/1
 
-
+#список фильмов (строка парметров)
+curl "localhost:4000/v1/movies?title=godfather&genres=crime,drama&page=18&page_size=5&sort=year"

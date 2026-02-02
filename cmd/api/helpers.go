@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/len4ernova/lets_go_further/internal/validator"
 )
 
 type envelope map[string]any
@@ -114,4 +116,42 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 		return errors.New("body must only contain a single JSON value")
 	}
 	return nil
+}
+
+// readString - возвращает строковое значение из query-string.
+func (app *application) readString(qs url.Values, key string, defaultValue string) string {
+	// извлечь значение по ключу, если ключа нет вернет ""
+	s := qs.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+
+	return s
+}
+
+// readCSV - читает строку, разбивает ее по символу ",", возвращает слайс; иначе вернуть по ум.
+func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
+	// извлечь значение по ключу
+	csv := qs.Get(key)
+	if csv == "" {
+		return defaultValue
+	}
+	return strings.Split(csv, ",")
+}
+
+// readInt()- читает строку,  и преобразовывает к int.
+// Если не удалось преобразовать в int, в валидатор записыватся ошибка.
+func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+	s := qs.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	return i
 }
