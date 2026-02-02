@@ -70,3 +70,6 @@ curl -X PUT localhost:4000/v1/movies/3
 
 # DELETE
 curl -X DELETE localhost:4000/v1/movies/3
+
+#PATCH
+curl -X PATCH -d '{"year": 1986}' localhost:4000/v1/movies/3
