@@ -88,3 +88,14 @@ curl "localhost:4000/v1/movies?title=godfather&genres=crime,drama&page=18&page_s
 # невалидна строка
 curl  "localhost:4000/v1/movies?page=-1&page_size=-1&sort=foo"
 
+# List all movies.
+/v1/movies
+
+# add filters
+# List movies where the title is a case-insensitive exact match for 'black panther'.  +  это пробел
+ curl "localhost:4000/v1/movies?title=black+panther"# List movies where the genres includes 'adventure'.
+ curl "localhost:4000/v1/movies?genres=adventure"
+ 
+ curl "localhost:4000/v1/movies?title=moana&genres=animation,adventure"
+ 
+ curl "localhost:4000/v1/movies?genres=western"  # не сущ-ие данные
