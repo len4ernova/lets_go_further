@@ -234,16 +234,14 @@ func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// вызвать GetAll список из БД
-	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
-		fmt.Println("1")
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"movies": movies}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
 	if err != nil {
-		fmt.Println("11")
 		app.serverErrorResponse(w, r, err)
 	}
 
