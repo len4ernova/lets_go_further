@@ -67,3 +67,9 @@ func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Requ
 	message := "unable to update the record due to an edit conflict, please try again"
 	app.errorResponse(w, r, http.StatusConflict, message)
 }
+
+// rateLimitExceededResponse - метод используется для отправки клиенту 429 «Слишком много запросов»
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+	message := "rate limit exceed"
+	app.errorResponse(w, r, http.StatusTooManyRequests, message)
+}

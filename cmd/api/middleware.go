@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"golang.org/x/time/rate"
 )
 
 // recoverPanic - обработка паники.
@@ -19,6 +21,21 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 			}
 		}()
 
+		next.ServeHTTP(w, r)
+	})
+}
+
+// rateLimit - ограничитель запросов. корзина с токенами пополняется со скоростью два токена в секунду.
+func (app *application) rateLimit(next http.Handler) http.Handler {
+	// инициализируем новый ограничитель запросов в среднем 2 запроса/сек, макс 4
+	limiter := rate.NewLimiter(2, 4)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Вызываем метод limiter.Allow(), чтобы проверить, разрешен ли запрос.
+		// Если нет, то мы вызываем вспомогательный метод rateLimitExceededResponse()
+		if !limiter.Allow() {
+			app.rateLimitExceededResponse(w, r)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }

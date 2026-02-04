@@ -119,3 +119,6 @@ curl  "localhost:4000/v1/movies?page=-1&page_size=-1&sort=foo"
 
 # метаданные
 curl "localhost:4000/v1/movies?page_size=2&page=2"
+
+# проверка ограничителя запросов (глобального)
+ for i in {1..6}; do curl http://localhost:4000/v1/healthcheck; done
