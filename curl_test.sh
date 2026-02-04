@@ -99,3 +99,6 @@ curl  "localhost:4000/v1/movies?page=-1&page_size=-1&sort=foo"
  curl "localhost:4000/v1/movies?title=moana&genres=animation,adventure"
  
  curl "localhost:4000/v1/movies?genres=western"  # не сущ-ие данные
+
+ # полнотеекстовый поиск 
+  curl "localhost:4000/v1/movies?title=panther"
