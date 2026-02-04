@@ -133,3 +133,10 @@ curl "localhost:4000/v1/movies?page_size=2&page=2"
  pkill -SIGKILL api
  pkill -SIGTERM api
  pkill -SIGQUIT api
+
+#проверить перехват сигналов и корректное завершение
+#  Add a 4 second delay штещ : cmd/api/healthcheck.go. 
+time.Sleep(4 * time.Second)
+curl localhost:4000/v1/healthcheck & pkill -SIGTERM api #придет резудьтат и после завершитсч работа
+
+
