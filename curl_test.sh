@@ -122,3 +122,6 @@ curl "localhost:4000/v1/movies?page_size=2&page=2"
 
 # проверка ограничителя запросов (глобального)
  for i in {1..6}; do curl http://localhost:4000/v1/healthcheck; done
+# проверка ограничителя запросов (глобального) + флаги запуска
+  go run ./cmd/api/ -limiter-burst=2
+  go run ./cmd/api/ -limiter-enabled=false
