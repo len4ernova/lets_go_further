@@ -102,3 +102,7 @@ curl  "localhost:4000/v1/movies?page=-1&page_size=-1&sort=foo"
 
  # полнотеекстовый поиск 
   curl "localhost:4000/v1/movies?title=panther"
+
+# запросить список фильмов, отсортированных по убыванию названия, времени
+ curl "localhost:4000/v1/movies?sort=-title"
+  curl "localhost:4000/v1/movies?sort=-runtime"

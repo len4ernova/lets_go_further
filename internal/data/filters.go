@@ -1,6 +1,10 @@
 package data
 
-import "github.com/len4ernova/lets_go_further/internal/validator"
+import (
+	"strings"
+
+	"github.com/len4ernova/lets_go_further/internal/validator"
+)
 
 type Filters struct {
 	Page         int
@@ -16,4 +20,24 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 	v.Check(f.PageSize > 0, "page_size", "must be greater than zero")
 	v.Check(f.PageSize <= 100, "page_size", "must be a maximum of 100")
 	v.Check(validator.PermittedValue(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
+}
+
+// sortColumn проверит соответствует ли введенное поле нашему безопасному списку.
+// в случае успеха извлект значение.
+func (f Filters) sortColumn() string {
+	for _, safeValue := range f.SortSafelist {
+		if f.Sort == safeValue {
+			return strings.TrimPrefix(f.Sort, "-")
+		}
+	}
+	panic("unsafe sort parameter: " + f.Sort)
+}
+
+// sort Direction - возвращает направление сортировки, в зависимости от префикса.
+func (f Filters) sortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+
+	return "ASC"
 }
