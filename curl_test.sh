@@ -140,3 +140,9 @@ time.Sleep(4 * time.Second)
 curl localhost:4000/v1/healthcheck & pkill -SIGTERM api #придет резудьтат и после завершитсч работа
 
 
+# 
+migrate create -seq -ext=.sql -dir=./migrations create_users_table
+ migrate -path=./migrations -database=$GREENLIGHT_DB_DSN up
+
+ go get golang.org/x/crypto/bcrypt@latest
+ 
