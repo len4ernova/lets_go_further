@@ -125,3 +125,11 @@ curl "localhost:4000/v1/movies?page_size=2&page=2"
 # проверка ограничителя запросов (глобального) + флаги запуска
   go run ./cmd/api/ -limiter-burst=2
   go run ./cmd/api/ -limiter-enabled=false
+
+# корректное завершение работы программы
+# посмотреть pid запущенного процесса
+# Intercepting Shutdown Signals
+ pgrep -l api
+ pkill -SIGKILL api
+ pkill -SIGTERM api
+ pkill -SIGQUIT api

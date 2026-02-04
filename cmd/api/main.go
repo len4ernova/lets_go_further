@@ -4,9 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"time"
 
@@ -81,21 +79,13 @@ func main() {
 		models: data.NewModels(db),
 	}
 
-	// Declare a HTTP server
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	// call a HTTP server
+	err = app.server()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 
-	// Start the HTTP server.
-	logger.Info("starting server", "addr", srv.Addr)
-	err = srv.ListenAndServe()
-	logger.Error(err.Error())
-	os.Exit(1)
 }
 
 // openDB - ф-ия возвращает пул соединенией sql.DB.
