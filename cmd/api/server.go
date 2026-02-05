@@ -51,7 +51,7 @@ func (app *application) server() error {
 	}()
 
 	// Start the HTTP server.
-	app.logger.Info("starting server", "addr", srv.Addr, "env", app.config)
+	app.logger.Info("starting server", "addr", srv.Addr, "env", app.config.env)
 	err := srv.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
