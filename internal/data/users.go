@@ -6,6 +6,7 @@ package data
 // I. Создание структуры и вспомогательных методов.
 // II. Добавляем валидацию данных.
 // III. Создаем модель в БД.
+// IV. Создать хендлер и подключить в роутинг.
 
 import (
 	"context"
@@ -111,7 +112,7 @@ func (m UserModel) Insert(user *User) error {
 	query := `
 	INSERT INTO users (name, email, password_hash, activated)
 	VALUES ($1, $2, $3, $4)
-	RETURNING id, created_t, version`
+	RETURNING id, created_at, version`
 
 	args := []any{user.Name, user.Email, user.Password.hash, user.Activated}
 
@@ -121,7 +122,7 @@ func (m UserModel) Insert(user *User) error {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
 	if err != nil {
 		switch {
-		case err.Error() == `pq.duplicate key value violates unique constraint "users_email_key"`:
+		case err.Error() == `pq: повторяющееся значение ключа нарушает ограничение уникальности "users_email_key" (23505)` || err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
 		default:
 			return err
@@ -183,7 +184,7 @@ func (m UserModel) Update(user *User) error {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
 	if err != nil {
 		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case err.Error() == `pq: повторяющееся значение ключа нарушает ограничение уникальности "users_email_key" (23505)` || err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
 		case errors.Is(err, sql.ErrNoRows):
 			return ErrEditConflict

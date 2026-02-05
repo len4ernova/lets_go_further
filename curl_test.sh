@@ -142,7 +142,17 @@ curl localhost:4000/v1/healthcheck & pkill -SIGTERM api #придет резуд
 
 # 
 migrate create -seq -ext=.sql -dir=./migrations create_users_table
- migrate -path=./migrations -database=$GREENLIGHT_DB_DSN up
+migrate -path=./migrations -database=$GREENLIGHT_DB_DSN up
 
- go get golang.org/x/crypto/bcrypt@latest
- 
+go get golang.org/x/crypto/bcrypt@latest
+
+# Регистрация нового пользователя: POST /v1/users registerUserHandler 
+#  I. Создание структуры и вспомогательных методов.
+#  II. Добавляем валидацию данных.
+#  III. Создаем модель в БД.
+#  IV. Создать хендлер и подключить в роутинг.
+BODY='{"name": "Alice Smith", "email": "alice@example.com", "password": "pa55word"}'
+curl -i -d "$BODY" localhost:4000/v1/users
+BODY='{"name": "", "email": "bob@invalid.", "password": "pass"}'  
+curl -i -d "$BODY" localhost:4000/v1/users
+
