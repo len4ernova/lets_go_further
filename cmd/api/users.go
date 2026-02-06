@@ -68,6 +68,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+	app.logger.Info("token user", token)
 
 	//////////// mailer
 	//методу Send() передать адрес пользовтеля, шаблон и пользоваетльские данные.
@@ -113,4 +114,66 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 	//*/
+}
+
+func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+	// из тела запроса заберем активационный токен
+	var input struct {
+		TokenPlaintext string `json:"token"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+
+	if data.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// получить данные пользователя по предоставленному токену. Если записи нет, то клиент получит ошибку.
+	user, err := app.models.Users.GetForToken(data.ScopeActivation, input.TokenPlaintext)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("token", "invalid or expired activation token")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// обновить - присвоить статус активирован
+	user.Activated = true
+
+	// сохранить в БД, проверив конфликт редактирования
+	err = app.models.Users.Update(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// удалить токен
+	err = app.models.Tokens.DeleteToken(data.ScopeActivation, user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// если все прошло успешно, удалить все токены активации пользователя
+	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }

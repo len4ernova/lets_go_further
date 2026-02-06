@@ -11,7 +11,7 @@ API:
 | V | PATCH |   /v1/movies/:id   | Update the details of a specific movie |
 | V | DELETE | /v1/movies/:id    | Delete a specific movie |
 | V | POST   | /v1/users         |  Register a new user |
-| | PUT    |  /v1/users/activated | Activate a specific user |
+| V | PUT    |  /v1/users/activated | Activate a specific user |
 | | PUT    |  /v1/users/password | Update the password for a specific user |
 | | POST   | /v1/tokens/authentication | Generate a new authentication token |
 | | POST   | /v1/tokens/password-reset | Generate a new password-reset token |
