@@ -155,3 +155,19 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+// background - ф-ия восстановления после паники.
+func (app *application) background(fn func()) {
+	// запуск фоновой горутины
+	go func() {
+		// восстановиться после паники
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.Error(fmt.Sprintf("%v", err))
+			}
+		}()
+		// выполнить переданную в качестве параметра функцию
+		fn()
+	}()
+
+}

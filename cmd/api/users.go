@@ -64,16 +64,39 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	//////////// mailer
 	//методу Send() передать адрес пользовтеля, шаблон и пользоваетльские данные.
-	/* TODO нет SMTP
-	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
+	// TODO нет SMTP
+	//  запустить горутину анонимной ф-ии выполняющей отправку сообщения
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	// go func() {
+	// 	// ф-ия обработки паники. Т.к. паника в горутине приведет к выходу из приложения.
+	// 	defer func() {
+	// 		if err := recover(); err != nil {
+	// 			app.logger.Error(fmt.Sprintf("%v", err))
+	// 		}
+	// 	}()
+
+	// 	//отправка приветственного сообщения
+	// 	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+	// 	if err != nil {
+	// 		// app.serverErrorResponse(w, r, err)
+	// 		// return
+	// 		// не исп-ем serverErrorResponse, т.к. это вызовет дополнительную отправку клиенту, а мы хотим отправить 202.
+	// 		app.logger.Error(err.Error())
+	// 	}
+	// }()
+
+	// замениv вызов фоновой горутины на вызов background()
+	app.background(func() {
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			// не исп-ем serverErrorResponse, т.к. это вызовет дополнительную отправку клиенту, а мы хотим отправить 202.
+			app.logger.Error(err.Error())
+		}
+	})
+	// клиенту отправим ответ 202 - обработка начата, не завершена.
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	*/
+	//*/
 }
