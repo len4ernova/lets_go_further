@@ -156,3 +156,16 @@ curl -i -d "$BODY" localhost:4000/v1/users
 BODY='{"name": "", "email": "bob@invalid.", "password": "pass"}'  
 curl -i -d "$BODY" localhost:4000/v1/users
 
+#  работаем с SMTP сервером - отправка прветственного сообщения(13)
+mkdir -p internal/mailer/templates
+touch internal/mailer/templates/user_welcome.tmpl
+# "subject" - тема письма
+# "plainBody" - текстовая часть 
+# "htmlBody" - html -письма
+
+go get github.com/wneessen/go-mail@latest
+
+migrate create -seq -ext .sql -dir ./migrations create_tokens_table
+
+BODY='{"name": "Bob Jones", "email": "bob@example.com", "password": "pa55word"}'
+curl -w '\nTime: %{time_total}\n'-i -d "$BODY" localhost:4000/v1/users

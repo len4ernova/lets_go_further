@@ -8,7 +8,7 @@ import (
 	"github.com/len4ernova/lets_go_further/internal/validator"
 )
 
-func (app *application) registerUSerHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	// структура для хранения данных из тела запроса
 	var input struct {
 		Name     string `json:"name"`
@@ -62,4 +62,18 @@ func (app *application) registerUSerHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 
+	//////////// mailer
+	//методу Send() передать адрес пользовтеля, шаблон и пользоваетльские данные.
+	/* TODO нет SMTP
+	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+	*/
 }

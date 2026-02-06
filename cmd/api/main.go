@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/len4ernova/lets_go_further/internal/data"
+	"github.com/len4ernova/lets_go_further/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
@@ -32,6 +33,14 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	// конфигурация smtp-сервера
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 // an application struct to hold the dependencies for our HTTP handlers, helpers, and middleware
@@ -39,6 +48,7 @@ type application struct {
 	config config
 	logger *slog.Logger
 	models data.Models
+	mailer *mailer.Mailer
 }
 
 func main() {
@@ -59,6 +69,12 @@ func main() {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "a7420fc0883489", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "e75ffd0a3aa5ec", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.alexedwards.net>", "SMTP sender")
+
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -72,11 +88,18 @@ func main() {
 
 	logger.Info("database connection pool established")
 
+	// инициализируем экземпляр Mailer параметтрами командной строки
+	mailer, err := mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	// Declare an instance of the application struct
 	app := &application{
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer,
 	}
 
 	// call a HTTP server
