@@ -46,8 +46,20 @@ func (app *application) server() error {
 		// Shutdown() вернет nil, если корректное завершение работы прошло успешно, или
 		//  ошибку (которая может возникнуть из-за проблем с закрытием прослушивателей или
 		//  из-за того, что завершение работы не было завершено до истечения 30-секундного
-		//  срока действия контекста). Мы передаем это возвращаемое значение в канал shutdownError.
-		shutdownError <- srv.Shutdown(ctx)
+		//  срока действия контекста). Мы передаем в канал shutdownError, только если произошла ошибка.
+
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+
+		// в лог передадим сообщение, что ожидаем завершения задач
+		app.logger.Info("complening background tasks", "addr", srv.Addr)
+
+		// заблокируем выполнение пока счетчик WaitGroup не обнулится.
+		// после чего передадил nil shutdownError
+		app.wg.Wait()
+		shutdownError <- nil
 	}()
 
 	// Start the HTTP server.

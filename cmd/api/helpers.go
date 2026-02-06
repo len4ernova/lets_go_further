@@ -158,8 +158,11 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 // background - ф-ия восстановления после паники.
 func (app *application) background(fn func()) {
+	app.wg.Add(1)
 	// запуск фоновой горутины
 	go func() {
+		defer app.wg.Done()
+
 		// восстановиться после паники
 		defer func() {
 			if err := recover(); err != nil {
