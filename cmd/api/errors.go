@@ -89,3 +89,15 @@ func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter
 	message := "invalid or missing authentication token"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
 }
+
+// authenticationRequireResponse - метод отправляет клиенту 401, если клиент запрашивает доступ к ресурсу без аутентификациии.
+func (app *application) authenticationRequireResponse(w http.ResponseWriter, r *http.Request) {
+	message := "you must be authenticated to access this resource"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+// inactiveAccountREsponse - метод отправляет клиенту 403, если клиенту не разрешен доступ к ресурсу.
+func (app *application) inactiveAccountREsponse(w http.ResponseWriter, r *http.Request) {
+	message := "your user account must be activated to access this resource"
+	app.errorResponse(w, r, http.StatusForbidden, message)
+}

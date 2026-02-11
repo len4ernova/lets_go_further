@@ -160,3 +160,26 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// requireActivatedUser - функци оборачивает обработчики для проверки аутентификации и доступа к ресурсу.
+func (app *application) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// получим инфо о пользователе из контекста запроса
+		user := app.ContextGetUser(r)
+
+		// если анонимный, то отправим 401 и требование аутентиф-ся
+		if user.IsAnonymous() {
+			app.authenticationRequireResponse(w, r)
+			return
+		}
+
+		// если учетная запись на активирована, то проинформируем клиента 401
+		if !user.Activated {
+			app.inactiveAccountREsponse(w, r)
+			return
+		}
+
+		// вызываем next handler
+		next.ServeHTTP(w, r)
+	})
+}
