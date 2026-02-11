@@ -79,3 +79,13 @@ func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *htt
 	message := "invalid authentication creditials"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
 }
+
+// invalidAuthenticationTokenResponse - метод используется для отправки клиенту 401 «Не авторизован»,
+// если метод Authentication представлен, но имеет некорректеный формат или недопустимые значения.
+func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {
+	// напоминаем клиенту что хотим получить "Bearer ..."
+	w.Header().Set("WWW-Authenticate", "Bearer")
+
+	message := "invalid or missing authentication token"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}

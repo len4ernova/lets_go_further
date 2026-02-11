@@ -236,3 +236,11 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 	}
 	return &user, nil
 }
+
+// AnonymousUser представляет неактивного пользователя, без идентификатора, без имени, без пароля.
+var AnonymousUser = &User{}
+
+// IsAnonymous - является ли пользователь анонимным.
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}

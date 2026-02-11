@@ -167,15 +167,22 @@ go get github.com/wneessen/go-mail@latest
 
 
 BODY='{"name": "Bob Jones", "email": "bob@example.com", "password": "pa55word"}'
-curl -w '\nTime: %{time_total}\n'-i -d "$BODY" localhost:4000/v1/users
+curl -w '\nTime: %{time_total}\n' -i -d "$BODY" localhost:4000/v1/users
 
 
 # активация user используя токен
 migrate create -seq -ext .sql -dir ./migrations create_tokens_table
 curl -X PUT -d '{"token":"invalid"}' localhost:4000/v1/users/activated
 
-# создание польхователя, получение токена с сохранением состояния
+# создание пользователя, получение токена с сохранением состояния
 BODY='{"name": "alex", "email": "alix@mail.com", "password": "pa55word"}'
 curl -i -d "$BODY" localhost:4000/v1/users
 BODY='{"email":"alix@mail.com", "password":"pa55word"}'
 curl -i -d "$BODY" localhost:4000/v1/tokens/authentication
+
+# запросить ресурс без токена аутентификации
+curl localhost:4000/v1/healthcheck
+# запросить токен по email и паролю
+curl -w '\nTime: %{time_total}\n' -d '{"email":"alix@mail.com", "password":"pa55word"}' localhost:4000/v1/tokens/authentication
+# запросить ресурс по токену  пользоватля
+curl -w '\nTime: %{time_total}\n' -H "Authorization: Bearer <token>" localhost:4000/v1/healthcheck
