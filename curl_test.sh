@@ -174,3 +174,8 @@ curl -w '\nTime: %{time_total}\n'-i -d "$BODY" localhost:4000/v1/users
 migrate create -seq -ext .sql -dir ./migrations create_tokens_table
 curl -X PUT -d '{"token":"invalid"}' localhost:4000/v1/users/activated
 
+# создание польхователя, получение токена с сохранением состояния
+BODY='{"name": "alex", "email": "alix@mail.com", "password": "pa55word"}'
+curl -i -d "$BODY" localhost:4000/v1/users
+BODY='{"email":"alix@mail.com", "password":"pa55word"}'
+curl -i -d "$BODY" localhost:4000/v1/tokens/authentication

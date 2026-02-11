@@ -135,7 +135,7 @@ func (m UserModel) Insert(user *User) error {
 // GetByEmail -получить данные из БД на основе эл.почты
 func (m UserModel) GetByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, creates_at, name, email, password_hash, activated, version
+	SELECT id, created_at, name, email, password_hash, activated, version
 	FROM users
 	WHERE email = $1`
 	var user User

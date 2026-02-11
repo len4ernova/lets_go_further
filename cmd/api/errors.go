@@ -73,3 +73,9 @@ func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http
 	message := "rate limit exceed"
 	app.errorResponse(w, r, http.StatusTooManyRequests, message)
 }
+
+// invalidCreditialsResponse - метод используется для отправки клиенту 401 «Не авторизован»
+func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *http.Request) {
+	message := "invalid authentication creditials"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}

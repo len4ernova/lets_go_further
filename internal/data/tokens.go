@@ -14,16 +14,17 @@ import (
 
 // константы - области видимости токенов
 const (
-	ScopeActivation = "activation"
+	ScopeActivation     = "activation"
+	ScopeAuthentication = "authentication"
 )
 
 // данные по токену
 type Token struct {
-	Plaintext string // исх.токен
-	Hash      []byte // хеш токена
-	UserID    int64
-	Expire    time.Time // время жизни
-	Scope     string    //  область применения токена
+	Plaintext string    `json:"token"` // исх.токен
+	Hash      []byte    `json:"-"`     // хеш токена
+	UserID    int64     `json:"-"`
+	Expire    time.Time `json:"expiry"` // время жизни
+	Scope     string    `json:"-"`      //  область применения токена
 }
 
 // generateToken - сформировать токен.
