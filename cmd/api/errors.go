@@ -91,7 +91,7 @@ func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter
 }
 
 // authenticationRequireResponse - метод отправляет клиенту 401, если клиент запрашивает доступ к ресурсу без аутентификациии.
-func (app *application) authenticationRequireResponse(w http.ResponseWriter, r *http.Request) {
+func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
 	message := "you must be authenticated to access this resource"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
 }

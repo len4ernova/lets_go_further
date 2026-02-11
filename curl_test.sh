@@ -186,3 +186,5 @@ curl localhost:4000/v1/healthcheck
 curl -w '\nTime: %{time_total}\n' -d '{"email":"alix@mail.com", "password":"pa55word"}' localhost:4000/v1/tokens/authentication
 # запросить ресурс по токену  пользоватля
 curl -w '\nTime: %{time_total}\n' -H "Authorization: Bearer <token>" localhost:4000/v1/healthcheck
+
+# после ввода middleware для /v1/movies/* проверятся аутентифиция и активация пользователя
