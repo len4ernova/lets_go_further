@@ -188,3 +188,6 @@ curl -w '\nTime: %{time_total}\n' -d '{"email":"alix@mail.com", "password":"pa55
 curl -w '\nTime: %{time_total}\n' -H "Authorization: Bearer <token>" localhost:4000/v1/healthcheck
 
 # после ввода middleware для /v1/movies/* проверятся аутентифиция и активация пользователя
+
+#разграничение доступа
+migrate create -seq -ext .sql -dir ./migrations add_permissions
