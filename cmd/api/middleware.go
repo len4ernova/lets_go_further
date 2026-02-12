@@ -221,8 +221,9 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 // Предварительно прояверяется является ли источник доверенным.
 func (app *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// добавим заголовок, чтобы сообщить браузеру что ответ может отличаться
+		// добавить заголовки, чтобы сообщить браузеру что ответ может отличаться в зависимости от наличия этих заголовков.
 		w.Header().Add("Vary", "Origin")
+		w.Header().Add("Vary", "Access-Control-Request-Method")
 
 		// зпросим значения Origin из заголовка
 		origin := r.Header.Get("Origin")
@@ -234,6 +235,19 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 			for i := range app.config.cors.trustedOrigins {
 				if origin == app.config.cors.trustedOrigins[i] {
 					w.Header().Set("Access-Control-Allow-Origin", origin)
+
+					// проверим не содержит ли запрос мутод OPTIONS, "Access-Control-Request-Method" header
+					// если содержит, то мы считаем это предварительным запросом
+					if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+						// установить необходимые заголовки предварительного ответа
+						w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")
+						w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+						// ! важно не устанавливать "Access-Control-Allow-Origin: *" и проверять из доверенных источников,
+						// т.к. подвержены атаке brute-force
+						// записать заголоки со статусом 200 и вернуться из мидлеваре без предварительных действий
+						w.WriteHeader(http.StatusOK)
+						return
+					}
 					break
 				}
 			}

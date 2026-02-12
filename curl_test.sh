@@ -240,3 +240,25 @@ go run ./cmd/api -cors-trusted-origins="https://www.example.com https://staging.
 
 # 9000, 9001 - доверенные источники
 go run ./cmd/api -cors-trusted-origins="http://localhost:9000 http://localhost:9001"
+
+# Responding to preflight requests - реагирование на предварительный запрос.
+# Предварительный запрос должен иметь 3 компонента: 
+# the HTTP method OPTIONS, an Origin header, and an Access-Control-Request-Method header.
+#  После определения отправить 200 и спец.заголовк для полуения реального запроса:
+#     Access-Control-Allow-Origin: <reflected trusted origin>
+#     Access-Control-Allow-Methods: OPTIONS, PUT, PATCH, DELETE
+#     Access-Control-Allow-Headers: Authorization, Content-Type
+
+# CORS-safe methods HEAD, GET or POST in the Access-Control-Allow-Methods.
+# 4 CORS-safe headers:
+#     Accept
+#     Accept-Language
+#     Content-Language
+#     Content-Type
+# The value for the Content-Type header (if set) is one of:
+#     application/x-www-form-urlencoded
+#     multipart/form-data
+#     text/plain
+
+#  Можно установить время кеширования предварительных ответов (preflight responses) Access-Control-Max-Age: 60
+# отключить кеширование : -1
