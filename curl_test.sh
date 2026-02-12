@@ -191,3 +191,37 @@ curl -w '\nTime: %{time_total}\n' -H "Authorization: Bearer <token>" localhost:4
 
 #разграничение доступа
 migrate create -seq -ext .sql -dir ./migrations add_permissions
+
+
+#для проверки доступности пользователю ресурса
+#необходимоЖ пользователь аутентифицирован, активирован.
+#подредактирем БД
+# -- Set the activated field for alice@example.com to true.
+UPDATE users SET activated = true WHERE email = 'alice@example.com';
+# -- Give all users the 'movies:read' permission
+INSERT INTO users_permissions
+SELECT id, (SELECT id FROM permissions WHERE code = 'movies:read') FROM users;
+# -- Give faith@example.com the 'movies:write' permission
+INSERT INTO users_permissions
+VALUES (
+(SELECT id FROM users WHERE email = 'faith@example.com'),
+(SELECT id FROM permissions WHERE code = 'movies:write')
+);
+# -- List all activated users and their permissions.
+SELECT email, array_agg(permissions.code) as permissions
+FROM permissions
+INNER JOIN users_permissions ON users_permissions.permission_id = permissions.id
+INNER JOIN users ON users_permissions.user_id = users.id
+WHERE users.activated = true
+GROUP BY email;
+# запросить токен
+curl -d "$BODY" localhost:4000/v1/tokens/authentication
+{
+"authentication_token": {
+"token": "<token>",
+"expiry": "2021-04-17T20:49:39.963768416+02:00"
+}
+#получить доступ
+curl -H "Authorization: Bearer <token>" localhost:4000/v1/movies/1
+
+curl -X DELETE -H "Authorization: Bearer <token>" localhost:4000/v1/movies/1

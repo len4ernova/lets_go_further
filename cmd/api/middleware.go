@@ -161,7 +161,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 	})
 }
 
-// requireActivatedUser - функциz оборачивает обработчики для проверки аутентификации и активации.
+// requireActivatedUser - функция оборачивает обработчики для проверки аутентификации и активации.
 func (app *application) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// получим инфо о пользователе из контекста запроса
@@ -190,4 +190,29 @@ func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.Han
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// requirePermission - проверяет что у пользователя есть необходимые права.
+func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		// получить пользователя из контекста запроса
+		user := app.ContextGetUser(r)
+
+		// получить слайс разрешениий доступа для user
+		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		// проверка содержит ли необходимые разрешения
+		if !permissions.Include(code) {
+			app.notPermittedResponse(w, r)
+			return
+		}
+		// если разрешения есть, вызываем обработчик
+		next.ServeHTTP(w, r)
+	}
+	// обернуть requireActivatedUser
+	return app.requireActivatedUser(fn)
 }

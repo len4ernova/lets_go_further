@@ -101,3 +101,9 @@ func (app *application) inactiveAccountREsponse(w http.ResponseWriter, r *http.R
 	message := "your user account must be activated to access this resource"
 	app.errorResponse(w, r, http.StatusForbidden, message)
 }
+
+// notPermittedResponse - метод возвращает 403, если у пользователя нет необходимых прав.
+func (app *application) notPermittedResponse(w http.ResponseWriter, r *http.Request) {
+	message := "yuor user account doesn't have the necessery permissions to access this resource"
+	app.errorResponse(w, r, http.StatusForbidden, message)
+}
