@@ -225,3 +225,10 @@ curl -d "$BODY" localhost:4000/v1/tokens/authentication
 curl -H "Authorization: Bearer <token>" localhost:4000/v1/movies/1
 
 curl -X DELETE -H "Authorization: Bearer <token>" localhost:4000/v1/movies/1
+
+# даем пользователю права при создании
+# выборка из БД
+SELECT email, code FROM users
+INNER JOIN users_permissions ON users.id = users_permissions.user_id
+INNER JOIN permissions ON users_permissions.permission_id = permissions.id
+WHERE users.email = 'grace@example.com';
