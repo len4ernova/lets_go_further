@@ -217,10 +217,27 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 	return app.requireActivatedUser(fn)
 }
 
-// enableCORS - метод устанавливает заголовок "Access-Control-Allow-Origin" CORS
+// enableCORS - метод устанавливает заголовок "Access-Control-Allow-Origin" CORS.
+// Предварительно прояверяется является ли источник доверенным.
 func (app *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		// добавим заголовок, чтобы сообщить браузеру что ответ может отличаться
+		w.Header().Add("Vary", "Origin")
+
+		// зпросим значения Origin из заголовка
+		origin := r.Header.Get("Origin")
+
+		// выполняется если Origin присутствует
+		if origin != "" {
+			// проходим циклом по доверенныым источникам и ищем сопадение.
+			// в случае успеха установим "Access-Control-Allow-Origin"
+			for i := range app.config.cors.trustedOrigins {
+				if origin == app.config.cors.trustedOrigins[i] {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+		}
 
 		next.ServeHTTP(w, r)
 	})

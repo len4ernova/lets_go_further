@@ -232,3 +232,11 @@ SELECT email, code FROM users
 INNER JOIN users_permissions ON users.id = users_permissions.user_id
 INNER JOIN permissions ON users_permissions.permission_id = permissions.id
 WHERE users.email = 'grace@example.com';
+
+
+# supporting multiple dynamic origins CORS - междоменные запросы
+# add flag
+go run ./cmd/api -cors-trusted-origins="https://www.example.com https://staging.example.com"
+
+# 9000, 9001 - доверенные источники
+go run ./cmd/api -cors-trusted-origins="http://localhost:9000 http://localhost:9001"
