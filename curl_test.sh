@@ -274,3 +274,9 @@ go run ./cmd/api -cors-trusted-origins="http://localhost:9000 http://localhost:9
 #  (то есть общее количество памяти, зарезервированноые средой выполнения Go для кучи, стеков и других внутренних структур данных). 
 #  NumGC — количество завершенных циклов сборки мусора. 
 #  NextGC — целевой размер кучи для следующего цикла сборки мусора (Go стремится поддерживать HeapAlloc ≤ NextGC).
+
+go run ./cmd/api -limiter-enabled=false -db-max-open-conns=50 -db-max-idle-conns=50 -db-max-idle-time=20s -port=4000
+BODY='{"email":"max@example.com", "password":"pa55word"}'
+#нагрузочное тестирование
+hey -d "$BODY" -m "POST" http://localhost:4000/v1/tokens/authentication  
+# вызовем конечную точку /debug/vars

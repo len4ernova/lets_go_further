@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	"log/slog"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -105,6 +107,23 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+	// опубликуем номер версии в expvar handler
+	expvar.NewString("version").Set(version)
+
+	// опубликуем кол-во активных горутин
+	expvar.Publish("gorutines", expvar.Func(func() any {
+		return runtime.NumGoroutine()
+	}))
+	// опубликуем статистику пула соединений с БД
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
+
+	// опубликуем текущее Unix timestam
+	expvar.Publish("timestamp", expvar.Func(func() any {
+		return time.Now().Unix()
+	}))
+
 	// Declare an instance of the application struct
 	app := &application{
 		config: cfg,
