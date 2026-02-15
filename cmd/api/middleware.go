@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"expvar"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -255,4 +257,101 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// metrics - запись пользовательских метрик на уровне запросов.
+func (app *application) metrics(next http.Handler) http.Handler {
+	// инициализируем новые переменный expvar
+	var (
+		totalRequestsReceived           = expvar.NewInt("total_requests_received")
+		totalResponsesSent              = expvar.NewInt("total_responses_sent")
+		totalProcessingTimeMicroseconds = expvar.NewInt("total_processing_time_ms")
+		totalActiveResponses            = expvar.NewInt("total_active_responses")
+
+		totalResponsesSentByStatus = expvar.NewMap("total_responses_sent_by_status") // хранения количества ответов для каждого HTTP-статуса код
+	)
+
+	// выполняется при каждом запросе
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// формируем время начала обработки запроса
+		start := time.Now()
+		// увеличить кол-во запросов
+
+		totalRequestsReceived.Add(1)
+
+		//обернуть исходное значение http.ResponseWriter, полученное промежуточным ПО для сбора метрик
+		mw := newMetricsResponseWriter(w)
+
+		next.ServeHTTP(mw, r)
+
+		// вызвать след. handler в цепочке
+		next.ServeHTTP(w, r)
+
+		// при возврате вверх по мидлваре увеличим кол-во ответов
+		totalResponsesSent.Add(1)
+		// код состояния ответа должен быть сохранен в поле
+		// mw.statusCode. Обратите внимание, что ключ в карте expvar — это строка,
+		// поэтому нам нужно использовать функцию strconv.Itoa(),
+		// чтобы преобразовать код состояния (целое число) в строку.
+		// Затем мы используем метод Add() на нашей новой карте totalResponsesSentByStatus,
+		// чтобы увеличить счетчик для данного кода состояния на 1.
+		totalResponsesSentByStatus.Add(strconv.Itoa(mw.statusCode), 1)
+
+		//посчитать кол-во милесукунд затраченных на обработку запроса и добавим к общему
+		duration := time.Since(start).Milliseconds()
+		totalProcessingTimeMicroseconds.Add(duration)
+
+		// кол-во активных запросов
+		activeResponses := totalRequestsReceived.Value() - totalResponsesSent.Value()
+		fmt.Println(totalRequestsReceived.Value(), totalResponsesSent.Value())
+		totalActiveResponses.Set(activeResponses)
+
+	})
+}
+
+// оборачиваем ResponseWriter, поле для записи кода состояния, логическое поле - записан или нет код состояния
+type metricsResponseWriter struct {
+	wrapped       http.ResponseWriter
+	statusCode    int
+	headerWritten bool
+}
+
+// newMetricsResponseWriter - функция оборачивает исхлдный ResponseWriter
+// и записывает код 200 (по ум. возвр-ся в ответе)
+func newMetricsResponseWriter(w http.ResponseWriter) *metricsResponseWriter {
+	return &metricsResponseWriter{
+		wrapped:    w,
+		statusCode: http.StatusOK,
+	}
+}
+
+// Header - метод выполняет "сквозной переход" к методу Header()
+func (mw *metricsResponseWriter) Header() http.Header {
+	return mw.wrapped.Header()
+}
+
+// WriteHeader() выполняет "сквозной переход" к методу WriteHeader()
+// обернутого http.ResponseWriter. Но после того, как это значение вернется,
+// мы также запишем код состояния ответа (если он еще не был записан)
+// и установим для поля headerWritten значение true, чтобы указать, что заголовки HTTP-ответа уже записаны
+func (mw *metricsResponseWriter) WriteHeader(statusCode int) {
+	mw.wrapped.WriteHeader(statusCode)
+	if !mw.headerWritten {
+		mw.statusCode = statusCode
+		mw.headerWritten = true
+	}
+}
+
+// Write() «передает» вызов методу Write() объекта
+//
+//	обернутого http.ResponseWriter. При вызове этого метода автоматически записываются все
+//	заголовки ответа, поэтому мы устанавливаем для поля headerWritten значение true
+func (mw *metricsResponseWriter) Write(b []byte) (int, error) {
+	mw.headerWritten = true
+	return mw.wrapped.Write(b)
+}
+
+// Unwrap() возвращает существующий обернутый объект http.ResponseWriter
+func (mw *metricsResponseWriter) Unwrap() http.ResponseWriter {
+	return mw.wrapped
 }

@@ -280,3 +280,14 @@ BODY='{"email":"max@example.com", "password":"pa55word"}'
 #нагрузочное тестирование
 hey -d "$BODY" -m "POST" http://localhost:4000/v1/tokens/authentication  
 # вызовем конечную точку /debug/vars
+
+
+
+# запустите API без ограничения скорости
+go run ./cmd/api -limiter-enabled=false
+
+
+# для проверки карты запросов. В этом случае, приложение возвратит /debug/vars "total_responses_sent_by_status": {"201": 4, "429": 196}
+go run ./cmd/api
+hey -d "$BODY" -m "POST" http://localhost:4000/v1/tokens/authentication
+#TODO https://prometheus.io/
