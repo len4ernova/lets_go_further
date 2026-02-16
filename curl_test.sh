@@ -304,3 +304,30 @@ make help
 make run/api
 #direnv https://direnv.net/ или include
 echo '.envrc' >> .gitignore
+
+# контроль качества
+`go mod tidy -diff` проверяет устарели ли go.mod and go.sum 
+`go mod verify ` не изменились ли зависимости в $GOPATH/pkg/mod (совпадение контр сумм)
+`go vet ./...` выполняет стат анализ (https://golang.org/cmd/vet/)
+staticcheck (https://staticcheck.io/)  https://staticcheck.io/docs/checks
+`go test -race -vet=off ./...` запуск тестов с детектором гонки и отключенным vet.
+`go mod tidy` удаление/добавление зависимостей
+`go fmt ./...` форматирование кода в соотв-ии со стандартом
+
+go get -tool honnef.co/go/tools/cmd/staticcheck@latest   
+go tool staticcheck --version
+
+go tool (https://www.alexedwards.net/blog/how-to-manage-tool-dependencies-in-go-1.24-plus)
+staticcheck для статического анализа кода
+govulncheck сканирования уязвимостей `go get -tool golang.org/x/vuln/cmd/govulncheck` (https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)
+air для перезагрузки приложений в режиме реального времени (https://github.com/air-verse/air)
+`go get -tool golang.org/x/tools/cmd/stringer`
+
+# TODO tests
+# - Creating an end-to-end test for the GET /v1/healthcheck endpoint to verify that the
+# headers and response body are what you expect.
+# - Creating a unit-test for the rateLimit() middleware to confirm that it sends a
+# 429 Too Many Requests response after a certain number of requests.
+# - Creating an end-to-end integration test, using a test database instance, which confirms
+# that the authenticate() and requirePermission() middleware work together correctly
+# to allow or disallow access to specific endpoints.

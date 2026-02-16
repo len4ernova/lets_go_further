@@ -74,7 +74,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	app.logger.Info("token user", token)
+	// app.logger.Info("token user ", token.Plaintext)
 
 	//////////// mailer
 	//методу Send() передать адрес пользовтеля, шаблон и пользоваетльские данные.
