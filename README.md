@@ -12,9 +12,9 @@ API:
 | V | DELETE | /v1/movies/:id    | Delete a specific movie |
 | V | POST   | /v1/users         |  Register a new user |
 | V | PUT    |  /v1/users/activated | Activate a specific user |
-| | PUT    |  /v1/users/password | Update the password for a specific user |
-| | POST   | /v1/tokens/authentication | Generate a new authentication token |
+|  | PUT    |  /v1/users/password | Update the password for a specific user |
+| V | POST   | /v1/tokens/authentication | Generate a new authentication token |
 | | POST   | /v1/tokens/password-reset | Generate a new password-reset token |
-| | GET    | /debug/vars         | Display application metrics |
+| V | GET    | /debug/vars         | Display application metrics |
 
 Роутинг - httprouter.
