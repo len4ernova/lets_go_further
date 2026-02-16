@@ -291,3 +291,9 @@ go run ./cmd/api -limiter-enabled=false
 go run ./cmd/api
 hey -d "$BODY" -m "POST" http://localhost:4000/v1/tokens/authentication
 #TODO https://prometheus.io/
+
+
+# Makefile
+make
+make up
+make migration name=create_example_table
