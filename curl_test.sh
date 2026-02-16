@@ -347,3 +347,14 @@ go env
 go mod vendor  добавление зависимостей в проект
 
 `go clean -modcache` - удалит все из локального кеша зависимостей
+
+# уменьшить размер исполняемого файла можно удалив symbol tables and DWARF debugging information
+# c момощью флага ldflaf (!затруднит отладку с пом.  Delve or gdb)
+go build -ldflags='-s' -o=./bin/api ./cmd/api
+# удаление только отладочной таблицы -ldflags='-s -w=0'
+
+
+# список поддерживаемых архитектур:
+go tool dist list
+#  задать ОС и архитектуру
+ GOOS=linux GOARCH=amd64 go build {args}
