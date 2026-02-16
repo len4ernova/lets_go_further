@@ -306,8 +306,10 @@ make run/api
 echo '.envrc' >> .gitignore
 
 # контроль качества
-`go mod tidy -diff` проверяет устарели ли go.mod and go.sum 
-`go mod verify ` не изменились ли зависимости в $GOPATH/pkg/mod (совпадение контр сумм)
+`go mod tidy -diff` проверяет что в go.mod and go.sum содержатся все зависимости
+`go mod verify ` проверяет, что зависимости в $GOPATH/pkg/mod соответсвуют конт.суммам в go.sum
+`go mod vendor` скопирует исх.код из кеша модуля в директорию vendor проекта
+
 `go vet ./...` выполняет стат анализ (https://golang.org/cmd/vet/)
 staticcheck (https://staticcheck.io/)  https://staticcheck.io/docs/checks
 `go test -race -vet=off ./...` запуск тестов с детектором гонки и отключенным vet.
@@ -331,3 +333,17 @@ air для перезагрузки приложений в режиме реа�
 # - Creating an end-to-end integration test, using a test database instance, which confirms
 # that the authenticate() and requirePermission() middleware work together correctly
 # to allow or disallow access to specific endpoints.
+
+
+
+go env
+# GOPROXY - содержит зеркало для скачивания пакета
+# преопределить:
+# export GOPROXY=https://goproxy.io,https://proxy.golang.org,direct
+# возможные зеркала:
+#  https://goproxy.io
+#  https://athens.azurefd.net
+
+go mod vendor  добавление зависимостей в проект
+
+`go clean -modcache` - удалит все из локального кеша зависимостей
