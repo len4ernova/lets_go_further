@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"runtime"
@@ -14,10 +15,14 @@ import (
 
 	"github.com/len4ernova/lets_go_further/internal/data"
 	"github.com/len4ernova/lets_go_further/internal/mailer"
+	"github.com/len4ernova/lets_go_further/internal/vcs"
 	_ "github.com/lib/pq"
 )
 
-const version = "1.0.0" // version app
+// const version = "1.0.0" // version app
+var (
+	version = vcs.VersionCustom()
+)
 
 // configuration settings for app
 type config struct {
@@ -88,7 +93,15 @@ func main() {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	// если указан флаг version, тогда вывести номер версии и выйти
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 

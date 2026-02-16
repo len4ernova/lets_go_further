@@ -363,3 +363,14 @@ echo 'bin/' >> .gitignore
 # go env GOCACHE где находится кеш сборки
 go build -a -o=/bin/foo ./cmd/foo # Force all packages to be rebuilt
 go clean -cache # Remove everything from the build cache
+
+
+# version
+ make build/api
+ go version -m ./bin/api покажет инфо о бин файле
+# vsc инфо о системе контроля версий
+# mod ... v0.0.0.... псевдоверсия автом-ки сгененрированная Go https://go.dev/ref/mod#pseudo-versions
+#  debug.BuildInfo - содержит инфо что и go version -m (https://pkg.go.dev/runtime/debug#BuildInfo)
+# версия не встраивается при запуске go run и go test без -buildvcs=true. Version: (devel)
+ git tag v1.0.0
+ # про коммиты и версии https://go.dev/ref/mod#pseudo-versions
