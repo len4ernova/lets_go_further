@@ -297,3 +297,5 @@ hey -d "$BODY" -m "POST" http://localhost:4000/v1/tokens/authentication
 make
 make up
 make migration name=create_example_table
+#make special variables https://www.gnu.org/software/make/manual/html_node/Special-Variables.html
+make help
