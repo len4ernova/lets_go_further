@@ -357,4 +357,9 @@ go build -ldflags='-s' -o=./bin/api ./cmd/api
 # список поддерживаемых архитектур:
 go tool dist list
 #  задать ОС и архитектуру
- GOOS=linux GOARCH=amd64 go build {args}
+GOOS=linux GOARCH=amd64 go build {args}
+echo 'bin/' >> .gitignore
+
+# go env GOCACHE где находится кеш сборки
+go build -a -o=/bin/foo ./cmd/foo # Force all packages to be rebuilt
+go clean -cache # Remove everything from the build cache
