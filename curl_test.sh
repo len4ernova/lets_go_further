@@ -374,3 +374,9 @@ go clean -cache # Remove everything from the build cache
 # версия не встраивается при запуске go run и go test без -buildvcs=true. Version: (devel)
  git tag v1.0.0
  # про коммиты и версии https://go.dev/ref/mod#pseudo-versions
+
+
+  ssh-keygen -t rsa -b 4096 -C "greenlight@greenlight.alexedwards.net" -f $HOME/.ssh/id_rsa_greenlight
+   ssh-add -l # отобразить ключ
+    ssh-add $HOME/.ssh/id_rsa_greenlight   # добавить ключ в ssh-agent
+    
