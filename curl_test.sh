@@ -299,3 +299,5 @@ make up
 make migration name=create_example_table
 #make special variables https://www.gnu.org/software/make/manual/html_node/Special-Variables.html
 make help
+# phony target https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html#Phony-Targets
+# https://www.gnu.org/software/make/manual/html_node/Special-Targets.html#Special-Targets
