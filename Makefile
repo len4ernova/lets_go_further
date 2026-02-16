@@ -1,10 +1,13 @@
-# Create the new confirm target.
+# Include variables from the .envrc file
+include .envrc
+
 ## help: print this help message
 .PHONY: help
 help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
+# Create the new confirm target.
 .PHONY: confirm
 confirm:
 	@echo -n 'Are you sure? (y/n) ' && read ans && [ $${ans:-N} = y ]

@@ -302,3 +302,5 @@ make help
 # phony target https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html#Phony-Targets
 # https://www.gnu.org/software/make/manual/html_node/Special-Targets.html#Special-Targets
 make run/api
+#direnv https://direnv.net/ или include
+echo '.envrc' >> .gitignore
