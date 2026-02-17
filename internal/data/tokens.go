@@ -16,6 +16,7 @@ import (
 const (
 	ScopeActivation     = "activation"
 	ScopeAuthentication = "authentication"
+	ScopePasswordReset  = "password-reset"
 )
 
 // данные по токену
@@ -78,7 +79,7 @@ func (m TokenModel) Insert(token *Token) error {
 }
 
 // DeleteToken - удалит токен определеннного пользователя.
-func (m TokenModel) DeleteToken(scope string, userID int64) error {
+func (m TokenModel) DeleteAllForUser(scope string, userID int64) error {
 	query := `
 		DELETE FROM tokens 
 		WHERE scope = $1 AND user_id = $2`

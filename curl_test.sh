@@ -380,3 +380,9 @@ go clean -cache # Remove everything from the build cache
    ssh-add -l # отобразить ключ
     ssh-add $HOME/.ssh/id_rsa_greenlight   # добавить ключ в ssh-agent
     
+# запросить токен для сброса пароля
+ curl -X POST -d '{"email": "alice@example.com"}' localhost:4000/v1/tokens/password-reset
+
+# инициировать смену пароля, отправив токен сброса из письма 
+BODY='{"password": "your new password", "token": "Y7QC"}'
+curl -X PUT -d "$BODY" localhost:4000/v1/users/password
