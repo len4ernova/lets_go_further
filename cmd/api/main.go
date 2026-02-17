@@ -54,6 +54,10 @@ type config struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	// jwt
+	jwt struct {
+		secret string // поле для хранения секретного ключа подписи
+	}
 }
 
 // an application struct to hold the dependencies for our HTTP handlers, helpers, and middleware
@@ -93,6 +97,7 @@ func main() {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", "", "JWT secret")
 	displayVersion := flag.Bool("version", false, "Display version and exit")
 
 	flag.Parse()

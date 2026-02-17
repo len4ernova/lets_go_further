@@ -12,6 +12,7 @@ import (
 
 	"github.com/len4ernova/lets_go_further/internal/data"
 	"github.com/len4ernova/lets_go_further/internal/validator"
+	"github.com/pascaldekloe/jwt"
 	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
 )
@@ -156,6 +157,87 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		}
 
 		// добавим инфо о user в контекст запроса
+		r = app.contextSetUser(r, user)
+
+		// вызов next handler в цепочке
+		next.ServeHTTP(w, r)
+	})
+}
+
+// authenticateJWT - проверка аутентификации JWT
+func (app *application) authenticateJWT(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// добавим заголовок "Vary: Authorization".
+		// Сообщает кешу, что ответ может отличаться в зависимости от значения в заголовке Authorization
+		w.Header().Add("Very", "Authorization")
+
+		// Получим значение "Authorization" из заголовка запроса.
+		// если отсутсвует, вернуть получим ""
+		authorizationHeader := r.Header.Get("Authorization")
+
+		// если заголовка не было, добавим анонимного пользователя в контекст запроса.
+		// Затем вызовим next обработчик.
+		if authorizationHeader == "" {
+			r = app.contextSetUser(r, data.AnonymousUser)
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// иначе ожидаем получить "Bearer <token>".
+		// Пытаемся его разбить на части. Если не получилось, вернуть 401.
+		headerParts := strings.Split(authorizationHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// излекаем токен
+		token := headerParts[1]
+
+		// парсим токен и излекаем полезную нагрузку
+		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.jwt.secret))
+		if err != nil {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// проверка валидности JWT
+		if !claims.Valid(time.Now()) {
+			app.invalidCredentialsResponse(w, r)
+			return
+		}
+
+		// подтвердим этитента
+		if claims.Issuer != "greenlight.alexedwards.net" {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// проверка целевой аудитории
+		if !claims.AcceptAudience("greenlight.alexedwards.net") {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// jwt в порядке, излечем ID пользователя
+		userID, err := strconv.ParseInt(claims.Subject, 10, 64)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+		// найти запись пользователя в БД
+		user, err := app.models.Users.Get(userID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.invalidAuthenticationTokenResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+
+		// добавим инфо о user в контекст запроса и продолжить работу
 		r = app.contextSetUser(r, user)
 
 		// вызов next handler в цепочке

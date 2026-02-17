@@ -3,10 +3,13 @@ package main
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/len4ernova/lets_go_further/internal/data"
 	"github.com/len4ernova/lets_go_further/internal/validator"
+
+	"github.com/pascaldekloe/jwt"
 )
 
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +200,79 @@ func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *h
 	// отправить пользователю 202 и сообщение подтверждающее отправку
 	env := envelope{"message": "an email will be sent to you containing activation instructions"}
 	err = app.writeJSON(w, http.StatusAccepted, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+}
+
+// createAuthenticationJWTTokenHandler генерация токена используя JWT
+func (app *application) createAuthenticationJWTTokenHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+
+	data.ValidateEmail(v, input.Email)
+	data.ValidatePasswordPlaintext(v, input.Password)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// поиск пользователя по email.
+	// Если не найден, то возврат кода 401 Не авторизован.
+	user, err := app.models.Users.GetByEmail(input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.invalidCredentialsResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// проверка на совпадение пароля
+	match, err := user.Password.Matches(input.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// если пароли не совпадают
+	if !match {
+		app.invalidCredentialsResponse(w, r)
+		return
+	}
+
+	// создать полезную нагрузку
+	var claims jwt.Claims
+	claims.Subject = strconv.FormatInt(user.ID, 10)
+	claims.Issued = jwt.NewNumericTime(time.Now())
+	claims.NotBefore = jwt.NewNumericTime(time.Now())
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
+	claims.Issuer = "greenlight.alexedwards.net"
+	claims.Audiences = []string{"greenlight.alexedwards.net"}
+
+	// подписать полезнкю нагрузку HMAC и вернуть строку в виде base64
+	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.jwt.secret))
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// преобразовать срез байт в строку и вернуть в json ответе
+	err = app.writeJSON(w, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

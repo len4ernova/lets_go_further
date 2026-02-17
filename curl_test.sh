@@ -389,3 +389,27 @@ curl -X PUT -d "$BODY" localhost:4000/v1/users/password
 
 # пользователь запрашивает новый токен активации по email
 curl -X POST -d '{"email": "bob@example.com"}' localhost:4000/v1/tokens/activation
+
+
+## jwt
+# если jwt используется другими приложениями следует использовать ассиметричное шифрование 
+# (создающее jwt приложение хранит приватный ключ, использующее - проверяет открытым ключом подпись)
+# если используется тем же приложением, то исп-ся секретное слово и HMAC-SHA256
+
+# секретный ключ подписи добавим в .envrc (длина 32 bytes(256 bits))
+
+# получить  jwt-token 
+curl -X POST -d '{"email": "faith@example.com", "password": "pa55word"}' localhost:4000/v1/tokens/authentication
+
+# чтобы заменить авторизацию на JWT, необходимо использовать  middleware authenticateJWT
+# и направлять запросы
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmVlbmxpZ..." localhost:4000/v1/movies/2
+
+
+JWT Security Best Practices (https://curity.io/resources/learn/jwt-best-practices/)
+Critical vulnerabilities in JSON Web Token libraries (https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/)
+
+
+# кодирование в JSON
+Нулевые и пустые срезы кодируются по разному:
+{"emptySlice":[],"nilSlice":null}
