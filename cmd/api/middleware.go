@@ -366,8 +366,8 @@ func (app *application) metrics(next http.Handler) http.Handler {
 
 		next.ServeHTTP(mw, r)
 
-		// вызвать след. handler в цепочке
-		next.ServeHTTP(w, r)
+		// // вызвать след. handler в цепочке
+		// next.ServeHTTP(w, r)
 
 		// при возврате вверх по мидлваре увеличим кол-во ответов
 		totalResponsesSent.Add(1)
